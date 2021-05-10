@@ -274,6 +274,12 @@ var globalFlags = []cli.Flag{
 		Value:  "",
 		EnvVar: "CORS_DOMAINS",
 	},
+	cli.IntFlag{
+		Name:   "token-hash-size",
+		Usage:  "",
+		Value:  5,
+		EnvVar: "TOKEN_HASH_SIZE",
+	},
 }
 
 type Cmd struct {
@@ -376,6 +382,9 @@ func New() *Cmd {
 		if v := c.Int("rate-limit"); v > 0 {
 			options = append(options, server.RateLimit(v))
 		}
+
+		v := c.Int("token-hash-size")
+		options = append(options, server.TokenHashSize(v))
 
 		purgeDays := c.Int("purge-days")
 		purgeInterval := c.Int("purge-interval")

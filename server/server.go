@@ -30,6 +30,7 @@ import (
 	"errors"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"log"
+	"math"
 	"math/rand"
 	"mime"
 	"net/http"
@@ -187,6 +188,12 @@ func RateLimit(requests int) OptionFn {
 	}
 }
 
+func TokenHashSize(size int) OptionFn {
+	return func(srvr *Server) {
+		srvr.hashSize = int64(math.Pow(float64(BASE), float64(size-1)))
+	}
+}
+
 func Purge(days, interval int) OptionFn {
 	return func(srvr *Server) {
 		srvr.purgeDays = time.Duration(days) * time.Hour * 24
@@ -293,6 +300,8 @@ type Server struct {
 	storage Storage
 
 	forceHTTPs bool
+
+	hashSize int64
 
 	ipFilterOptions *IPFilterOptions
 

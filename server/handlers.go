@@ -257,7 +257,7 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := Encode(10000000 + int64(rand.Intn(1000000000)))
+	token := Encode(s.hashSize + rand.Int63n(s.hashSize))
 
 	w.Header().Set("Content-Type", "text/plain")
 
@@ -319,7 +319,7 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			metadata := MetadataForRequest(contentType, r)
+			metadata := MetadataForRequest(contentType, s.hashSize, r)
 
 			buffer := &bytes.Buffer{}
 			if err := json.NewEncoder(buffer).Encode(metadata); err != nil {
@@ -383,13 +383,13 @@ type Metadata struct {
 	DeletionToken string
 }
 
-func MetadataForRequest(contentType string, r *http.Request) Metadata {
+func MetadataForRequest(contentType string, hashSize int64, r *http.Request) Metadata {
 	metadata := Metadata{
 		ContentType:   strings.ToLower(contentType),
 		MaxDate:       time.Time{},
 		Downloads:     0,
 		MaxDownloads:  -1,
-		DeletionToken: Encode(10000000+int64(rand.Intn(1000000000))) + Encode(10000000+int64(rand.Intn(1000000000))),
+		DeletionToken: Encode(hashSize+rand.Int63n(hashSize)) + Encode(hashSize+rand.Int63n(hashSize)),
 	}
 
 	if v := r.Header.Get("Max-Downloads"); v == "" {
@@ -481,9 +481,9 @@ func (s *Server) putHandler(w http.ResponseWriter, r *http.Request) {
 		contentType = mime.TypeByExtension(filepath.Ext(vars["filename"]))
 	}
 
-	token := Encode(10000000 + int64(rand.Intn(1000000000)))
+	token := Encode(s.hashSize + rand.Int63n(s.hashSize))
 
-	metadata := MetadataForRequest(contentType, r)
+	metadata := MetadataForRequest(contentType, s.hashSize, r)
 
 	buffer := &bytes.Buffer{}
 	if err := json.NewEncoder(buffer).Encode(metadata); err != nil {
