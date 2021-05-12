@@ -41,7 +41,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"mime"
 	"net/http"
 	"net/url"
@@ -257,7 +256,7 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := Encode(s.hashSize + rand.Int63n(s.hashSize))
+	token := Encode(INIT_SEED, s.randomTokenLength)
 
 	w.Header().Set("Content-Type", "text/plain")
 
@@ -319,7 +318,7 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			metadata := MetadataForRequest(contentType, s.hashSize, r)
+			metadata := MetadataForRequest(contentType, s.randomTokenLength, r)
 
 			buffer := &bytes.Buffer{}
 			if err := json.NewEncoder(buffer).Encode(metadata); err != nil {
@@ -383,13 +382,13 @@ type Metadata struct {
 	DeletionToken string
 }
 
-func MetadataForRequest(contentType string, hashSize int64, r *http.Request) Metadata {
+func MetadataForRequest(contentType string, randomTokenLength int64, r *http.Request) Metadata {
 	metadata := Metadata{
 		ContentType:   strings.ToLower(contentType),
 		MaxDate:       time.Time{},
 		Downloads:     0,
 		MaxDownloads:  -1,
-		DeletionToken: Encode(hashSize+rand.Int63n(hashSize)) + Encode(hashSize+rand.Int63n(hashSize)),
+		DeletionToken: Encode(INIT_SEED, randomTokenLength) + Encode(INIT_SEED, randomTokenLength),
 	}
 
 	if v := r.Header.Get("Max-Downloads"); v == "" {
@@ -481,9 +480,9 @@ func (s *Server) putHandler(w http.ResponseWriter, r *http.Request) {
 		contentType = mime.TypeByExtension(filepath.Ext(vars["filename"]))
 	}
 
-	token := Encode(s.hashSize + rand.Int63n(s.hashSize))
+	token := Encode(INIT_SEED, s.randomTokenLength)
 
-	metadata := MetadataForRequest(contentType, s.hashSize, r)
+	metadata := MetadataForRequest(contentType, s.randomTokenLength, r)
 
 	buffer := &bytes.Buffer{}
 	if err := json.NewEncoder(buffer).Encode(metadata); err != nil {

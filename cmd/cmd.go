@@ -274,11 +274,11 @@ var globalFlags = []cli.Flag{
 		Value:  "",
 		EnvVar: "CORS_DOMAINS",
 	},
-	cli.IntFlag{
-		Name:   "token-hash-size",
+	cli.Int64Flag{
+		Name:   "random-token-length",
 		Usage:  "",
-		Value:  5,
-		EnvVar: "TOKEN_HASH_SIZE",
+		Value:  6,
+		EnvVar: "RANDOM_TOKEN_LENGTH",
 	},
 }
 
@@ -383,8 +383,8 @@ func New() *Cmd {
 			options = append(options, server.RateLimit(v))
 		}
 
-		v := c.Int("token-hash-size")
-		options = append(options, server.TokenHashSize(v))
+		v := c.Int64("random-token-length")
+		options = append(options, server.RandomTokenLength(v))
 
 		purgeDays := c.Int("purge-days")
 		purgeInterval := c.Int("purge-interval")

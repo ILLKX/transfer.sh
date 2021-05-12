@@ -30,7 +30,6 @@ import (
 	"errors"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"log"
-	"math"
 	"math/rand"
 	"mime"
 	"net/http"
@@ -188,9 +187,9 @@ func RateLimit(requests int) OptionFn {
 	}
 }
 
-func TokenHashSize(size int) OptionFn {
+func RandomTokenLength(length int64) OptionFn {
 	return func(srvr *Server) {
-		srvr.hashSize = int64(math.Pow(float64(BASE), float64(size-1)))
+		srvr.randomTokenLength = length
 	}
 }
 
@@ -301,7 +300,7 @@ type Server struct {
 
 	forceHTTPs bool
 
-	hashSize int64
+	randomTokenLength int64
 
 	ipFilterOptions *IPFilterOptions
 
